@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - VideoPro</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#0a0a0a;color:#e0e0e0;font-family:'Courier New',monospace;padding:20px}
+        h1{color:#00f0ff;text-align:center;margin:20px 0;letter-spacing:3px}
+        .box{background:#111;border:1px solid #1a1a1a;border-radius:15px;padding:20px;margin:15px 0}
+        h2{color:#ff00ff;margin-bottom:10px;font-size:1.1em}
+        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        @media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
+        .card{background:#0a0a0a;padding:15px;border-radius:10px;text-align:center}
+        .num{font-size:2em;color:#00ff41}
+        .label{color:#888;font-size:0.7em;margin-top:5px}
+        table{width:100%;border-collapse:collapse;margin-top:10px}
+        th{color:#00f0ff;border-bottom:1px solid #1a1a1a;padding:10px;font-size:0.8em;text-align:left}
+        td{color:#888;border-bottom:1px solid #0a0a0a;padding:10px;font-size:0.75em}
+        input{padding:10px;background:#0a0a0a;border:1px solid #1a1a1a;color:#e0e0e0;border-radius:8px;width:100%;margin:10px 0;font-family:'Courier New',monospace}
+        button{background:#ff00ff;color:#0a0a0a;border:none;padding:12px 25px;border-radius:8px;cursor:pointer;font-weight:bold;font-family:'Courier New',monospace}
+        a{color:#ff00ff}
+    </style>
+</head>
+<body>
+    <h1>VIDEOPRO ADMIN</h1>
+    {% if login %}
+    <div class="box" style="max-width:400px;margin:0 auto">
+        <h2>Login</h2>
+        {% if error %}<p style="color:#ff3333">{{ error }}</p>{% endif %}
+        <form method="POST">
+            <input type="text" name="user" placeholder="Usuario" required>
+            <input type="password" name="pass" placeholder="Contrasena" required>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="grid">
+        <div class="card"><div class="num">{{ stats.total_visits }}</div><div class="label">Visitas Totales</div></div>
+        <div class="card"><div class="num">{{ stats.total_videos }}</div><div class="label">Videos Procesados</div></div>
+        <div class="card"><div class="num">{{ total_users }}</div><div class="label">Usuarios Unicos</div></div>
+        <div class="card"><div class="num">{{ stats.ad_views }}</div><div class="label">Anuncios Vistos</div></div>
+        <div class="card"><div class="num">{{ peak_hour }}h</div><div class="label">Hora Pico</div></div>
+        <div class="card"><div class="num">{{ most_used }}</div><div class="label">Funcion Favorita</div></div>
+    </div>
+    <div class="box"><h2>Ultimos 10 Videos</h2>
+        <table><tr><th>Hora</th><th>Archivo</th><th>Funcion</th></tr>
+        {% for h in stats.history[-10:]|reverse %}
+        <tr><td>{{ h.time }}</td><td>{{ h.filename }}</td><td>{{ h.function }}</td></tr>
+        {% endfor %}</table></div>
+    <p style="text-align:center;margin-top:20px"><a href="/admin/logout">Cerrar Sesion</a> | <a href="/">Ir a la Web</a></p>
+    {% endif %}
+</body>
+</html>
