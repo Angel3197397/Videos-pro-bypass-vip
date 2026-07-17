@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoPro - Procesador de Videos Online | 100 Herramientas</title>
+    <style>
+        :root {
+            --bg: #050505; --card: #0d0d0d; --border: #1a1a1a;
+            --cyan: #00e5ff; --magenta: #d400ff; --green: #00ff41;
+            --yellow: #ffd700; --red: #ff1744; --white: #e0e0e0;
+            --gray: #888; --orange: #ff6d00; --whatsapp: #25d366;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg); color: var(--white);
+            font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh;
+            background-image: radial-gradient(ellipse at top, rgba(0,229,255,0.05) 0%, transparent 70%),
+                            radial-gradient(ellipse at bottom, rgba(212,0,255,0.05) 0%, transparent 70%);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 3px; }
+        
+        #adblock-wall {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.97); z-index: 99999; text-align: center; padding-top: 15vh;
+        }
+        #adblock-wall.active { display: block; }
+        #adblock-wall h2 { color: var(--red); font-size: 2.2em; font-weight: 700; }
+        #adblock-wall button { background: var(--red); color: white; border: none; padding: 16px 40px; font-size: 1.2em; border-radius: 50px; cursor: pointer; font-weight: 700; margin-top: 20px; }
+        
+        .header { text-align: center; padding: 25px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .header .logo { font-size: 2.8em; font-weight: 900; letter-spacing: 6px; background: linear-gradient(135deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header .slogan { color: var(--gray); font-size: 0.9em; letter-spacing: 2px; }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 15px; }
+        
+        .ad-bar { background: var(--card); border: 1px solid rgba(255,215,0,0.3); border-radius: 14px; padding: 12px; text-align: center; margin: 12px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
+        .ad-label { color: var(--yellow); font-size: 0.6em; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+        
+        .upload-zone { border: 2px dashed rgba(0,229,255,0.4); border-radius: 18px; padding: 40px 20px; text-align: center; cursor: pointer; background: var(--card); margin: 12px 0; transition: 0.4s; }
+        .upload-zone:hover { border-color: var(--magenta); box-shadow: 0 0 40px rgba(212,0,255,0.15); }
+        .upload-zone .icon { font-size: 3em; }
+        .upload-zone p { color: var(--gray); margin: 5px 0; }
+        .filename { color: var(--green) !important; display: none; margin-top: 8px; font-weight: 600; }
+        
+        .section { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin: 12px 0; }
+        .section h2 { font-size: 1.2em; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        .title-text { background: linear-gradient(135deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .badge { font-size: 0.5em; padding: 4px 12px; border-radius: 50px; letter-spacing: 2px; font-weight: 700; }
+        .badge-free { background: rgba(0,255,65,0.15); color: var(--green); border: 1px solid rgba(0,255,65,0.3); }
+        .badge-pro { background: rgba(255,109,0,0.15); color: var(--orange); border: 1px solid rgba(255,109,0,0.3); }
+        
+        .func-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        @media (max-width: 800px) { .func-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 500px) { .func-grid { grid-template-columns: repeat(2, 1fr); } }
+        .func { background: var(--bg); border: 2px solid var(--border); border-radius: 12px; padding: 14px 8px; cursor: pointer; text-align: center; transition: 0.3s; position: relative; user-select: none; }
+        .func.selected { border-color: var(--magenta); background: rgba(212,0,255,0.08); }
+        .func .check { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%; background: var(--magenta); color: white; font-size: 11px; display: none; align-items: center; justify-content: center; }
+        .func.selected .check { display: flex; }
+        .func .icon { font-size: 1.6em; }
+        .func .name { font-weight: 700; font-size: 0.75em; }
+        .cost { font-size: 0.55em; padding: 2px 8px; border-radius: 50px; display: inline-block; margin-top: 4px; font-weight: 600; }
+        .cost-free { background: rgba(0,255,65,0.1); color: var(--green); }
+        .cost-pro { background: rgba(255,109,0,0.1); color: var(--orange); }
+        
+        .sub-panel { display: none; margin-top: 12px; padding: 14px; background: var(--bg); border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .sub-panel.active { display: block; }
+        .sub-btn { background: var(--card); border: 2px solid var(--border); color: var(--white); padding: 8px 16px; margin: 3px; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 0.8em; }
+        .sub-btn.selected { border-color: var(--magenta); color: var(--magenta); background: rgba(212,0,255,0.1); }
+        
+        .btn { display: block; width: 100%; padding: 16px; font-size: 1.1em; font-weight: 700; border: none; border-radius: 50px; cursor: pointer; letter-spacing: 2px; margin: 12px 0; transition: 0.4s; text-transform: uppercase; }
+        .btn-process { background: linear-gradient(135deg, var(--cyan), var(--magenta)); color: var(--bg); }
+        .btn-process:disabled { background: var(--border); color: #555; cursor: not-allowed; }
+        .btn-download { background: var(--green); color: var(--bg); display: none; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,65,0.4)} 50%{box-shadow:0 0 0 15px rgba(0,255,65,0)} }
+        
+        .progress-box { display: none; margin: 12px 0; }
+        .progress-bar { height: 12px; background: var(--border); border-radius: 50px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--magenta)); border-radius: 50px; transition: width 0.5s; }
+        .progress-text { text-align: center; color: var(--cyan); margin-top: 8px; font-weight: 600; }
+        
+        .whatsapp-float { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: var(--whatsapp); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 999; box-shadow: 0 8px 25px rgba(37,211,102,0.4); }
+        .whatsapp-float svg { width: 28px; height: 28px; fill: white; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.93); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .modal.active { display: flex; }
+        .modal-box { background: transparent; border-radius: 20px; padding: 10px; text-align: center; max-width: 500px; width: 95%; display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .modal-ad-top, .modal-ad-bottom { background: #0a0a0a; border-radius: 10px; padding: 6px; min-height: 65px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,215,0,0.3); overflow: hidden; }
+        .modal-ad-top { position: relative; z-index: 10; }
+        .modal-ad-bottom { position: relative; z-index: 10; }
+        
+        .game-area { 
+            background: #080810; 
+            border-radius: 12px; 
+            padding: 10px; 
+            min-height: 240px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative; 
+            z-index: 5; 
+            border: 1px solid rgba(0, 229, 255, 0.15); 
+            touch-action: none; 
+            overflow: hidden;
+        }
+        .game-bg-ad {
+            position: absolute;
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.0;
+            pointer-events: none;
+        }
+        .game-area canvas { 
+            position: relative; 
+            z-index: 10; 
+            border-radius: 8px; 
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.15); 
+            background: transparent;
+            display: block; 
+            max-width: 100%; 
+            height: auto; 
+        }
+        
+        .modal-box h3 { color: var(--yellow); margin: 0; font-size: 1.1em; position: relative; z-index: 10; font-weight: 800; letter-spacing: 1px; }
+        .modal-box p { position: relative; z-index: 10; }
+        .footer { text-align: center; padding: 25px; color: #444; font-size: 0.7em; border-top: 1px solid rgba(255,255,255,0.03); margin-top: 15px; }
+        .selected-count { text-align: center; color: var(--magenta); font-size: 0.85em; margin: 8px 0; display: none; }
+        .selected-count.active { display: block; }
+        #fileInput { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="adblock-wall">
+    <h2>⚠️ BLOQUEADOR DETECTADO</h2>
+    <p>Desactiva tu bloqueador de anuncios para usar VideoPro.</p>
+    <p style="color:var(--gray);font-size:0.8em">Los anuncios mantienen este servicio 24/7.</p>
+    <button onclick="location.reload()">YA LO DESACTIVÉ - RECARGAR</button>
+</div>
+
+<div class="header">
+    <div class="logo">VIDEOPRO</div>
+    <p class="slogan">PROCESADOR DE VIDEOS PROFESIONAL • 100 HERRAMIENTAS REALES</p>
+</div>
+
+<div class="container">
+
+    <!-- ANUNCIO INICIAL: BANNER -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <div class="upload-zone" id="uploadZone">
+        <div class="icon">☁️</div>
+        <p style="font-size:1.2em;font-weight:700">ARRASTRA TU VIDEO AQUÍ</p>
+        <p>o haz click para seleccionar</p>
+        <p style="color:var(--red);font-size:0.7em">Máximo 1GB • MP4, MKV, MOV, AVI, WEBM</p>
+        <p class="filename" id="filename"></p>
+    </div>
+    <input type="file" id="fileInput" accept="video/*">
+
+    <div class="selected-count" id="selectedCount"></div>
+
+    <!-- BLOQUE 1 (1-10) -->
+    <div class="section">
+        <h2><span class="title-text">💎 BÁSICOS ESENCIALES</span> <span class="badge badge-free">GRATIS</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="vypeo" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⚡</div><div class="name">VYPEAR ORIGINAL</div><span class="cost cost-free">RAPID</span></div>
+            <div class="func" data-func="trim_video" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">✂️</div><div class="name">RECORTAR TIEMPO</div><span class="cost cost-free">CORTE</span></div>
+            <div class="func" data-func="compress_low" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📦</div><div class="name">COMPRESIÓN RÁPIDA</div><span class="cost cost-free">LIGERO</span></div>
+            <div class="func" data-func="mute_video" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔇</div><div class="name">QUITAR AUDIO</div><span class="cost cost-free">SILENCIO</span></div>
+            <div class="func" data-func="extract_audio" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎵</div><div class="name">EXTRAER MP3</div><span class="cost cost-free">AUDIO</span></div>
+            <div class="func" data-func="to_gif" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🖼️</div><div class="name">CREAR GIF</div><span class="cost cost-free">LOOP</span></div>
+            <div class="func" data-func="reverse_video" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔄</div><div class="name">VIDEO AL REVÉS</div><span class="cost cost-free">INVERT</span></div>
+            <div class="func" data-func="rotate_90_r" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">↪️</div><div class="name">ROTAR 90° DER</div><span class="cost cost-free">GIRO</span></div>
+            <div class="func" data-func="flip_h" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🪞</div><div class="name">ESPEJO HORIZ.</div><span class="cost cost-free">MIRROR</span></div>
+            <div class="func" data-func="change_speed_2x" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🚀</div><div class="name">CÁMARA RÁPIDA 2X</div><span class="cost cost-free">VELOZ</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 1 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 2 (11-20) -->
+    <div class="section">
+        <h2><span class="title-text">📱 OPTIMIZADORES DE REDES</span> <span class="badge badge-free">GRATIS</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="ratio_tiktok" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📱</div><div class="name">FORMATO TIKTOK</div><span class="cost cost-free">9:16</span></div>
+            <div class="func" data-func="ratio_reels" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📷</div><div class="name">IG REELS</div><span class="cost cost-free">9:16</span></div>
+            <div class="func" data-func="ratio_yt" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">▶️</div><div class="name">YOUTUBE STANDARD</div><span class="cost cost-free">16:9</span></div>
+            <div class="func" data-func="ratio_shorts" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🩳</div><div class="name">YT SHORTS</div><span class="cost cost-free">9:16</span></div>
+            <div class="func" data-func="ratio_square" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🟩</div><div class="name">IG FEED CUADRADO</div><span class="cost cost-free">1:1</span></div>
+            <div class="func" data-func="ratio_fb" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📘</div><div class="name">FACEBOOK VIDEO</div><span class="cost cost-free">4:5</span></div>
+            <div class="func" data-func="ratio_twitter" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🐦</div><div class="name">X / TWITTER OPT.</div><span class="cost cost-free">HD</span></div>
+            <div class="func" data-func="ratio_pinterest" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📌</div><div class="name">PINTEREST PIN</div><span class="cost cost-free">2:3</span></div>
+            <div class="func" data-func="ratio_linkedin" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">💼</div><div class="name">LINKEDIN POST</div><span class="cost cost-free">COMPAT</span></div>
+            <div class="func" data-func="crop_center" data-tier="free" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎯</div><div class="name">AUTO-CORTE CENTRO</div><span class="cost cost-free">CROP</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 2 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 3 (21-30) -->
+    <div class="section">
+        <h2><span class="title-text">⚡ REDUCTORES & BYPASS DE LÍMITES</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="bypass_wa" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">💭</div><div class="name">COMPRIMIR WHATSAPP</div><span class="cost cost-pro">&lt;64MB</span></div>
+            <div class="func" data-func="bypass_tg" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">💬</div><div class="name">TELEGRAM OPTIMIZE</div><span class="cost cost-pro">STREAM</span></div>
+            <div class="func" data-func="bypass_discord" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">👾</div><div class="name">DISCORD NITRO FREE</div><span class="cost cost-pro">&lt;25MB</span></div>
+            <div class="func" data-func="bypass_email" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">✉️</div><div class="name">COMPRIMIR CORREO</div><span class="cost cost-pro">&lt;20MB</span></div>
+            <div class="func" data-func="target_50mb" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📉</div><div class="name">FORZAR FIJO 50MB</div><span class="cost cost-pro">LIMIT</span></div>
+            <div class="func" data-func="target_10mb" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📉</div><div class="name">FORZAR FIJO 10MB</div><span class="cost cost-pro">MAX-COMP</span></div>
+            <div class="func" data-func="strip_meta" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔒</div><div class="name">ELIMINAR METADATOS</div><span class="cost cost-pro">PRIVADO</span></div>
+            <div class="func" data-func="remove_gps" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📍</div><div class="name">BORRAR RASTRO GPS</div><span class="cost cost-pro">ANÓNIMO</span></div>
+            <div class="func" data-func="compress_lossless" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">💎</div><div class="name">COMPRESIÓN SIN APAGAR</div><span class="cost cost-pro">CALIDAD</span></div>
+            <div class="func" data-func="fast_start" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⚡</div><div class="name">WEB FAST-START (MOOV)</div><span class="cost cost-pro">WEB OPT</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 3 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 4 (31-40) -->
+    <div class="section">
+        <h2><span class="title-text">🔊 INGENIERÍA DE AUDIO EXPERTA</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="audio_boost_200" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔊</div><div class="name">VOLUMEN AL 200%</div><span class="cost cost-pro">POTENCIA</span></div>
+            <div class="func" data-func="audio_boost_300" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📢</div><div class="name">VOLUMEN AL 300%</div><span class="cost cost-pro">MÁXIMO</span></div>
+            <div class="func" data-func="bass_boost" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎛️</div><div class="name">REFUERZO DE BAJOS</div><span class="cost cost-pro">BASS</span></div>
+            <div class="func" data-func="clean_noise" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌬️</div><div class="name">ELIMINAR VIENTO/RUIDO</div><span class="cost cost-pro">FILTRO</span></div>
+            <div class="func" data-func="normalize_audio" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📊</div><div class="name">NORMALIZAR AUDIO</div><span class="cost cost-pro">ESTABLE</span></div>
+            <div class="func" data-func="isolate_voice" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🗣️</div><div class="name">AISLAR SÓLO VOZ</div><span class="cost cost-pro">CLEAR</span></div>
+            <div class="func" data-func="remove_voice" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎤</div><div class="name">REMOVER VOZ (KARAOKE)</div><span class="cost cost-pro">PISTA</span></div>
+            <div class="func" data-func="audio_stereo" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎧</div><div class="name">FORZAR ESTÉREO 3D</div><span class="cost cost-pro">MONO-ST</span></div>
+            <div class="func" data-func="audio_8d" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌀</div><div class="name">EFECTO AUDIO 8D</div><span class="cost cost-pro">ENVOLV</span></div>
+            <div class="func" data-func="mute_low_db" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🤫</div><div class="name">PUERTA DE RUIDO</div><span class="cost cost-pro">SILENT</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 4 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 5 (41-50) -->
+    <div class="section">
+        <h2><span class="title-text">🛠️ REPARACIÓN & ANTI-ERRORES</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="repair_index" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🛠️</div><div class="name">REPARAR ARCHIVO CORRUPTO</div><span class="cost cost-pro">FIX INDEX</span></div>
+            <div class="func" data-func="fix_sync" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⏱️</div><div class="name">SINCRO AUDIO/VIDEO</div><span class="cost cost-pro">DELAY</span></div>
+            <div class="func" data-func="reencode_h264" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⚙️</div><div class="name">FORZAR CÓDEC H.264</div><span class="cost cost-pro">UNIVERSAL</span></div>
+            <div class="func" data-func="fix_green_screen" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🟢</div><div class="name">ARREGLAR PANTALLA VERDE</div><span class="cost cost-pro">BUG FIX</span></div>
+            <div class="func" data-func="convert_8bit" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎨</div><div class="name">FORZAR 8-BIT COLOR</div><span class="cost cost-pro">OLD-DEV</span></div>
+            <div class="func" data-func="remove_b_frames" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎞️</div><div class="name">ELIMINAR B-FRAMES</div><span class="cost cost-pro">COMPAT</span></div>
+            <div class="func" data-func="force_aac" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎵</div><div class="name">AUDIO A AAC CODEC</div><span class="cost cost-pro">STANDARD</span></div>
+            <div class="func" data-func="fix_aspect_ratio" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📐</div><div class="name">CORREGIR IMAGEN ESTIRADA</div><span class="cost cost-pro">RATIO</span></div>
+            <div class="func" data-func="repair_moov" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🧬</div><div class="name">RE CONSTRUIR ÁTOMO MOOV</div><span class="cost cost-pro">REPAIR</span></div>
+            <div class="func" data-func="clean_keyframes" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔑</div><div class="name">FORZAR INTRA-REFRESH</div><span class="cost cost-pro">KEYFRAME</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 5 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 6 (51-60) -->
+    <div class="section">
+        <h2><span class="title-text">🎨 RENDERIZADO & ULTRA-ESCALADO</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="upscale_1080" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📺</div><div class="name">ESCALAR A 1080P HD</div><span class="cost cost-pro">2 ANUNCIOS</span></div>
+            <div class="func" data-func="upscale_4k" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎬</div><div class="name">ESCALAR A 4K UHD</div><span class="cost cost-pro">2 ANUNCIOS</span></div>
+            <div class="func" data-func="fps_60" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🏃</div><div class="name">FORZAR A 60 FPS</div><span class="cost cost-pro">FLUIDO</span></div>
+            <div class="func" data-func="fps_custom" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⚙️</div><div class="name">FPS SELECCIONABLE</div><span class="cost cost-pro">PANEL</span></div>
+            <div class="func" data-func="sharpen" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">✨</div><div class="name">ENFOQUE DE DETALLES</div><span class="cost cost-pro">SHARPEN</span></div>
+            <div class="func" data-func="denoise_clipping" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">👁️</div><div class="name">ELIMINAR PIXELES BLOC</div><span class="cost cost-pro">CLEAN</span></div>
+            <div class="func" data-func="stabilize_ai" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎥</div><div class="name">ESTABILIZADO ÓPTICO</div><span class="cost cost-pro">NO-SHAKE</span></div>
+            <div class="func" data-func="hdr_simulation" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌈</div><div class="name">HDR FALSO INTELIGENTE</div><span class="cost cost-pro">VIVID</span></div>
+            <div class="func" data-func="deinterlace" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎞️</div><div class="name">DESENTRELAZAR VIDEO</div><span class="cost cost-pro">LINE-FIX</span></div>
+            <div class="func" data-func="brighten_dark" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">☀️</div><div class="name">ACLARAR GRABACIÓN OSCURA</div><span class="cost cost-pro">LIGHT</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 6 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 7 (61-70) -->
+    <div class="section">
+        <h2><span class="title-text">🎞️ ESTILOS VISUALES & EFECTOS</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="fx_cyberpunk" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🧪</div><div class="name">FILTRO CYBERPUNK</div><span class="cost cost-pro">NEÓN</span></div>
+            <div class="func" data-func="fx_vhs" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon"> Cassette 📼</div><div class="name">FILTRO VHS RETRO</div><span class="cost cost-pro">90S</span></div>
+            <div class="func" data-func="fx_cinema_bars" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎬</div><div class="name">BARRAS CINEMÁTICAS</div><span class="cost cost-pro">CINE</span></div>
+            <div class="func" data-func="fx_bw" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🖤</div><div class="name">BLANCO Y NEGRO PURIST</div><span class="cost cost-pro">RETRO</span></div>
+            <div class="func" data-func="fx_sepia" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🟤</div><div class="name">SEPIA CRÓNICA</div><span class="cost cost-pro">VINTAGE</span></div>
+            <div class="func" data-func="fx_invert" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🙃</div><div class="name">INVERTIR COLORES</div><span class="cost cost-pro">NEGATIV</span></div>
+            <div class="func" data-func="fx_blur_edges" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌫️</div><div class="name">DESENFOCAR FONDOS 9:16</div><span class="cost cost-pro">BLUR</span></div>
+            <div class="func" data-func="fx_vignette" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">👁️</div><div class="name">EFECTO VIÑETA NEGRA</div><span class="cost cost-pro">FOCUS</span></div>
+            <div class="func" data-func="fx_glitch" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">👾</div><div class="name">EFECTO GLITCH DIGITAL</div><span class="cost cost-pro">DISTORT</span></div>
+            <div class="func" data-func="fx_saturate" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎨</div><div class="name">INYECCIÓN DE COLOR</div><span class="cost cost-pro">SATURATE</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 7 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 8 (71-80) -->
+    <div class="section">
+        <h2><span class="title-text">⚙️ EDICIÓN AVANZADA & QUITAR WATERMARKS</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="del_watermark" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🧼</div><div class="name">REMOVER MARCA AGUA</div><span class="cost cost-pro">INTELIGENT</span></div>
+            <div class="func" data-func="extract_frames" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📸</div><div class="name">EXTRAER FOTOGRAMAS</div><span class="cost cost-pro">PNG ZIP</span></div>
+            <div class="func" data-func="slowmo_smooth" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⏯️</div><div class="name">CÁMARA LENTA REAL</div><span class="cost cost-pro">SMOOTH</span></div>
+            <div class="func" data-func="speed_4x" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🚀</div><div class="name">HIPER-LAPSO 4X SPEED</div><span class="cost cost-pro">FAST</span></div>
+            <div class="func" data-func="add_fade_in" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌑</div><div class="name">APARECER DESDE NEGRO</div><span class="cost cost-pro">FADE IN</span></div>
+            <div class="func" data-func="add_fade_out" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌘</div><div class="name">DESVANECER A NEGRO</div><span class="cost cost-pro">FADE OUT</span></div>
+            <div class="func" data-func="remove_first_3s" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⏱️</div><div class="name">BORRAR PRIMEROS 3s</div><span class="cost cost-pro">HOOK-DEL</span></div>
+            <div class="func" data-func="remove_last_3s" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⏱️</div><div class="name">BORRAR ÚLTIMOS 3s</div><span class="cost cost-pro">END-DEL</span></div>
+            <div class="func" data-func="zoom_in_static" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔍</div><div class="name">ZOOM FIJO DIGITAL +15%</div><span class="cost cost-pro">ZOOM</span></div>
+            <div class="func" data-func="chroma_key" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🟢</div><div class="name">ELIMINAR FONDO VERDE</div><span class="cost cost-pro">CHROMA</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 8 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 9 (81-90) -->
+    <div class="section">
+        <h2><span class="title-text">📦 CONVERSORES MULTI-FORMATO</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="to_mp4_clean" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎞️</div><div class="name">CONVERTIR A MP4</div><span class="cost cost-pro">UNIVERSAL</span></div>
+            <div class="func" data-func="to_webm" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌐</div><div class="name">CONVERTIR A WEBM</div><span class="cost cost-pro">HTML5 WEB</span></div>
+            <div class="func" data-func="to_mkv" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📦</div><div class="name">CONVERTIR A MKV</div><span class="cost cost-pro">LOSSLESS</span></div>
+            <div class="func" data-func="to_mov" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🍏</div><div class="name">CONVERTIR A MOV Apple</div><span class="cost cost-pro">PRORES</span></div>
+            <div class="func" data-func="to_avi" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📺</div><div class="name">CONVERTIR A AVI RETRO</div><span class="cost cost-pro">OLD-PC</span></div>
+            <div class="func" data-func="to_flv" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🌊</div><div class="name">CONVERTIR A FLV OLD</div><span class="cost cost-pro">STREAM</span></div>
+            <div class="func" data-func="to_ogv" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🐧</div><div class="name">CONVERTIR A OGV LINUX</div><span class="cost cost-pro">OPEN</span></div>
+            <div class="func" data-func="to_mp3_high" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎵</div><div class="name">EXTRAER AUDIO 320KBPS</div><span class="cost cost-pro">HQ MP3</span></div>
+            <div class="func" data-func="to_wav" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">💿</div><div class="name">EXTRAER AUDIO WAV STUDIO</div><span class="cost cost-pro">STUDIO</span></div>
+            <div class="func" data-func="to_flac" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🎼</div><div class="name">EXTRAER AUDIO FLAC LOSS</div><span class="cost cost-pro">FLAC</span></div>
+        </div>
+    </div>
+
+    <!-- PUBLICIDAD INTERCALADA 9 -->
+    <div class="ad-bar">
+        <span class="ad-label">Publicidad</span>
+        <script>
+            atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+        </script>
+        <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+    </div>
+
+    <!-- BLOQUE 10 (91-100) -->
+    <div class="section">
+        <h2><span class="title-text">🎛️ CONTROL DE BITRATE & PARÁMETROS</span> <span class="badge badge-pro">PRO</span></h2>
+        <div class="func-grid">
+            <div class="func" data-func="bitrate_1k" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📉</div><div class="name">LIMITAR BITRATE 1MBPS</div><span class="cost cost-pro">BAJO PESO</span></div>
+            <div class="func" data-func="bitrate_5k" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📊</div><div class="name">SITUAR BITRATE 5MBPS</div><span class="cost cost-pro">MEDIO HD</span></div>
+            <div class="func" data-func="bitrate_12k" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">📈</div><div class="name">FORZAR BITRATE 12MBPS</div><span class="cost cost-pro">STREAM HQ</span></div>
+            <div class="func" data-func="gop_set" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🧬</div><div class="name">GOP FIJO RECOMENDADO</div><span class="cost cost-pro">GOP STREAM</span></div>
+            <div class="func" data-func="audio_48khz" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔊</div><div class="name">REMUESTREO AUDIO 48KHZ</div><span class="cost cost-pro">PRO AUDIO</span></div>
+            <div class="func" data-func="audio_44khz" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🔊</div><div class="name">REMUESTREO AUDIO 44.1K</div><span class="cost cost-pro">CD AUDIO</span></div>
+            <div class="func" data-func="pixel_yuv420p" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⚙️</div><div class="name">FORZAR PIXEL FORMAT YUV</div><span class="cost cost-pro">TV COMPAT</span></div>
+            <div class="func" data-func="strip_subtitles" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">💬</div><div class="name">ELIMINAR SUBTÍTULOS</div><span class="cost cost-pro">STRIP SUB</span></div>
+            <div class="func" data-func="tune_zerolatency" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">⚡</div><div class="name">AJUSTE DE CERO LATENCIA</div><span class="cost cost-pro">STREAMER</span></div>
+            <div class="func" data-func="optimize_static_image" data-tier="pro" onclick="toggleFunc(this)"><div class="check">✓</div><div class="icon">🖼️</div><div class="name">OPTIMIZAR VIDEO ESTÁTICO</div><span class="cost cost-pro">STILL IMG</span></div>
+        </div>
+    </div>
+
+    <div class="sub-panel" id="sub-fps">
+        <p>🎯 SELECCIONA LOS FOTOGRAMAS POR SEGUNDO:</p>
+        <button class="sub-btn" onclick="setSub('fps','60')">60 FPS</button>
+        <button class="sub-btn" onclick="setSub('fps','90')">90 FPS</button>
+        <button class="sub-btn" onclick="setSub('fps','120')">120 FPS</button>
+    </div>
+
+    <button class="btn btn-process" id="btnProcess" disabled>⚙️ PROCESAR VIDEO</button>
+
+    <div class="progress-box" id="progressBox">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <p class="progress-text" id="progressText">Procesando...</p>
+    </div>
+
+    <button class="btn btn-download" id="btnDownload">📥 DESCARGAR VIDEO PROCESADO</button>
+
+    <div class="footer">VideoPro © 2026 • <a href="/admin/login">Admin Layout</a></div>
+</div>
+
+<a href="https://wa.me/584120000000" target="_blank" class="whatsapp-float">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" fill="white"/></svg>
+</a>
+
+<div class="modal" id="adModal">
+    <div class="modal-box">
+        <div class="modal-ad-top" id="modal-ad-top">
+            <span class="ad-label" style="font-size:0.5em">Publicidad</span>
+            <script>
+                atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+        </div>
+        
+        <h3>🚀 NEON SPACE VOYAGER</h3>
+        <p style="color:var(--gray);font-size:0.75em">Espera <span id="adTimer">5</span>s | Anuncio <span id="adNumber">1</span>/<span id="adTotal">1</span></p>
+        
+        <div class="game-area">
+            <div class="game-bg-ad">
+                <script>
+                    atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+                </script>
+                <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+            </div>
+            <canvas id="gameCanvas" width="300" height="220"></canvas>
+        </div>
+        
+        <div class="modal-ad-bottom" id="modal-ad-bottom">
+            <span class="ad-label" style="font-size:0.5em">Publicidad</span>
+            <script>
+                atOptions = { 'key' : '9d4e3a9bcc726c58c5eff07f0c385306', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script src="https://www.highperformanceformat.com/9d4e3a9bcc726c58c5eff07f0c385306/invoke.js"></script>
+        </div>
+        
+        <button id="adContinueBtn" disabled onclick="completeAd()" style="position:relative;z-index:10;background:var(--yellow);color:#000;border:none;padding:14px;border-radius:50px;cursor:pointer;font-weight:700;font-size:1em;width:100%">✅ CONTINUAR</button>
+    </div>
+</div>
+
+<!-- POPUNDER Y SOCIAL BAR EXTERNXS -->
+<script src="https://pl30397850.effectivecpmnetwork.com/b0/22/e6/b022e6dd79b78767bde1877e00396616.js"></script>
+<script src="https://pl30397851.effectivecpmnetwork.com/6f/c5/ba/6fc5bade570c351b1365563fd6daa151.js"></script>
+
+<script>
+const WHATSAPP_NUMBER = "584120000000";
+const MAX_SIZE = 1 * 1024 * 1024 * 1024;
+
+var selectedFile = null, selectedFuncs = [], options = {}, jobId = null;
+var totalAds = 0, currentAd = 0, adTimerInterval = null, secondsLeft = 5;
+var gameInterval = null;
+
+var uploadZone = document.getElementById('uploadZone');
+var fileInput = document.getElementById('fileInput');
+var filename = document.getElementById('filename');
+var adModal = document.getElementById('adModal');
+var adTimerSpan = document.getElementById('adTimer');
+var adContinueBtn = document.getElementById('adContinueBtn');
+var gameCanvas = document.getElementById('gameCanvas');
+var ctx = gameCanvas.getContext('2d');
+var adNumberSpan = document.getElementById('adNumber');
+var adTotalSpan = document.getElementById('adTotal');
+
+uploadZone.addEventListener('click', ()=> fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.style.borderColor = 'var(--magenta)'; });
+uploadZone.addEventListener('dragleave', ()=> { uploadZone.style.borderColor = 'rgba(0,229,255,0.4)'; });
+uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.style.borderColor = 'rgba(0,229,255,0.4)';
+    if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file){
+    if(file.size > MAX_SIZE){ alert('Máximo 1GB'); return; }
+    selectedFile = file;
+    filename.textContent = '✅ ' + file.name + ' (' + (file.size/1024/1024).toFixed(1) + 'MB)';
+    filename.style.display = 'block';
+    updateBtn();
+}
+
+function toggleFunc(el){
+    var func = el.dataset.func, tier = el.dataset.tier;
+    el.classList.toggle('selected');
+    if(el.classList.contains('selected')) selectedFuncs.push({func,tier});
+    else selectedFuncs = selectedFuncs.filter(f => f.func !== func);
+    if(func === 'fps_custom' && el.classList.contains('selected')) document.getElementById('sub-fps').classList.add('active');
+    else if(func === 'fps_custom'){ document.getElementById('sub-fps').classList.remove('active'); options.fps = null; }
+    updateCount(); updateBtn();
+}
+
+function setSub(type, value){
+    options[type] = value;
+    document.querySelectorAll('#sub-'+type+' .sub-btn').forEach(b => b.classList.remove('selected'));
+    event.target.classList.add('selected');
+}
+
+function updateCount(){
+    var free = selectedFuncs.filter(f => f.tier === 'free').length;
+    var pro = selectedFuncs.filter(f => f.tier === 'pro').length;
+    var el = document.getElementById('selectedCount');
+    if(free+pro > 0){
+        var extra = (free > 3 ? 2 : 0) + (pro * 2);
+        el.textContent = '📌 ' + (free+pro) + ' funciones | ' + extra + ' anuncios';
+        el.classList.add('active');
+    } else el.classList.remove('active');
+}
+
+function updateBtn(){ document.getElementById('btnProcess').disabled = !(selectedFile && selectedFuncs.length > 0); }
+
+document.getElementById('btnProcess').addEventListener('click', function(){
+    if(!selectedFile || selectedFuncs.length === 0) return;
+    var free = selectedFuncs.filter(f => f.tier === 'free').length;
+    var pro = selectedFuncs.filter(f => f.tier === 'pro').length;
+    totalAds = (free > 3 ? 2 : 0) + (pro * 2);
+    if(totalAds === 0){ startProcessing(); return; }
+    currentAd = 0;
+    showAdModal();
+});
+
+function showAdModal(){
+    secondsLeft = 5;
+    adTimerSpan.textContent = secondsLeft;
+    adContinueBtn.disabled = true;
+    adNumberSpan.textContent = currentAd + 1;
+    adTotalSpan.textContent = totalAds;
+    adModal.classList.add('active');
+    
+    clearInterval(gameInterval);
+    initSpaceGame();
+    
+    clearInterval(adTimerInterval);
+    adTimerInterval = setInterval(function(){
+        secondsLeft--;
+        adTimerSpan.textContent = secondsLeft;
+        if(secondsLeft <= 0){ clearInterval(adTimerInterval); adContinueBtn.disabled = false; }
+    }, 1000);
+}
+
+let player, stars, hazards, gems, particles, gameScore, keys;
+
+function initSpaceGame() {
+    player = { x: 150, y: 180, w: 22, h: 22, targetX: 150, speed: 0.18 };
+    stars = []; hazards = []; gems = []; particles = []; gameScore = 0; keys = {};
+    for (let i = 0; i < 25; i++) {
+        stars.push({ x: Math.random() * 300, y: Math.random() * 220, size: Math.random() * 2, speed: 0.5 + Math.random() * 1 });
+    }
+    document.onkeydown = (e) => keys[e.key] = true;
+    document.onkeyup = (e) => keys[e.key] = false;
+    function setTarget(clientX) {
+        const rect = gameCanvas.getBoundingClientRect();
+        const relativeX = (clientX - rect.left) * (300 / rect.width);
+        player.targetX = Math.max(15, Math.min(285, relativeX));
+    }
+    gameCanvas.onmousemove = (e) => setTarget(e.clientX);
+    gameCanvas.ontouchstart = (e) => { if(e.touches[0]) setTarget(e.touches[0].clientX); };
+    gameCanvas.ontouchmove = (e) => {
+        if (e.touches[0]) setTarget(e.touches[0].clientX);
+        e.preventDefault();
+    };
+    gameInterval = setInterval(updateSpaceGame, 1000 / 60);
+}
+
+function spawnParticle(x, y, color) {
+    for (let i = 0; i < 8; i++) {
+        particles.push({ x: x, y: y, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, size: Math.random() * 3 + 1, color: color, alpha: 1 });
+    }
+}
+
+function updateSpaceGame() {
+    ctx.clearRect(0, 0, 300, 220);
+    ctx.fillStyle = 'rgba(2, 2, 5, 0.4)';
+    ctx.fillRect(0, 0, 300, 220);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    stars.forEach(star => {
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+        star.y += star.speed;
+        if (star.y > 220) { star.y = 0; star.x = Math.random() * 300; }
+    });
+
+    if (keys['ArrowLeft'] || keys['a']) player.targetX = Math.max(15, player.targetX - 5);
+    if (keys['ArrowRight'] || keys['d']) player.targetX = Math.min(285, player.targetX + 5);
+
+    player.x += (player.targetX - player.x) * player.speed;
+
+    ctx.shadowBlur = 10; ctx.shadowColor = '#d400ff'; ctx.fillStyle = '#d400ff';
+    ctx.beginPath(); ctx.moveTo(player.x, player.y - 12); ctx.lineTo(player.x - 11, player.y + 10); ctx.lineTo(player.x + 11, player.y + 10); ctx.closePath(); ctx.fill();
+
+    ctx.fillStyle = '#00e5ff'; ctx.shadowColor = '#00e5ff';
+    ctx.beginPath(); ctx.moveTo(player.x - 4, player.y + 11); ctx.lineTo(player.x + 4, player.y + 11); ctx.lineTo(player.x, player.y + 17 + Math.random() * 6); ctx.closePath(); ctx.fill();
+
+    if (Math.random() < 0.04 && hazards.length < 5) hazards.push({ x: Math.random() * 280 + 10, y: -20, r: Math.random() * 8 + 5, speed: 2 + Math.random() * 3 });
+    if (Math.random() < 0.02 && gems.length < 3) gems.push({ x: Math.random() * 280 + 10, y: -20, r: 6, speed: 1.5 + Math.random() * 2 });
+
+    ctx.shadowBlur = 8; ctx.shadowColor = '#ff1744'; ctx.fillStyle = '#ff1744';
+    hazards.forEach((h, index) => {
+        h.y += h.speed; ctx.beginPath(); ctx.arc(h.x, h.y, h.r, 0, Math.PI * 2); ctx.fill();
+        if (Math.hypot(player.x - h.x, player.y - h.y) < h.r + 8) { spawnParticle(player.x, player.y, '#ff1744'); gameScore = Math.max(0, gameScore - 15); hazards.splice(index, 1); }
+        if (h.y > 240) hazards.splice(index, 1);
+    });
+
+    ctx.shadowColor = '#00ff41'; ctx.fillStyle = '#00ff41';
+    gems.forEach((g, index) => {
+        g.y += g.speed; ctx.beginPath(); ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2); ctx.fill();
+        if (Math.hypot(player.x - g.x, player.y - g.y) < g.r + 10) { spawnParticle(g.x, g.y, '#00ff41'); gameScore += 10; gems.splice(index, 1); }
+        if (g.y > 240) gems.splice(index, 1);
+    });
+
+    particles.forEach((p, index) => {
+        p.x += p.vx; p.y += p.vy; p.alpha -= 0.03;
+        if (p.alpha <= 0) particles.splice(index, 1);
+        else { ctx.shadowBlur = 0; ctx.fillStyle = p.color; ctx.globalAlpha = p.alpha; ctx.fillRect(p.x, p.y, p.size, p.size); ctx.globalAlpha = 1; }
+    });
+
+    ctx.shadowBlur = 0; ctx.fillStyle = '#fff'; ctx.font = 'bold 12px monospace'; ctx.fillText('PUNTOS: ' + gameScore, 10, 20);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; ctx.font = '9px sans-serif'; ctx.fillText('Desliza para mover la nave', 160, 20);
+}
+
+function completeAd(){
+    clearInterval(adTimerInterval); clearInterval(gameInterval); document.onkeydown = null;
+    adModal.classList.remove('active'); currentAd++;
+    if(currentAd < totalAds) showAdModal(); else startProcessing();
+}
+
+function startProcessing(){
+    document.getElementById('progressBox').style.display = 'block';
+    document.getElementById('btnProcess').style.display = 'none';
+    document.getElementById('progressText').textContent = 'Subiendo archivo...';
+    var form = new FormData();
+    form.append('video', selectedFile);
+    form.append('functions', JSON.stringify(selectedFuncs));
+    for(var key in options) form.append(key, options[key]);
+    
+    fetch('/upload', {method:'POST', body:form})
+    .then(r => r.json())
+    .then(data => { if(data.error){ alert(data.error); return; } jobId = data.job_id; checkProgress(); })
+    .catch(()=> alert('Error de conexión'));
+}
+
+function checkProgress(){
+    var timer = setInterval(function(){
+        fetch('/progress/'+jobId)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('progressFill').style.width = data.progress + '%';
+            document.getElementById('progressText').textContent = 'Procesando requerimientos... ' + data.progress + '%';
+            if(data.progress >= 100){
+                clearInterval(timer);
+                document.getElementById('progressText').textContent = '✅ ¡Video Procesado con Éxito!';
+                document.getElementById('btnDownload').style.display = 'block';
+                document.getElementById('btnDownload').onclick = ()=> window.location.href = '/download/'+jobId;
+            }
+        });
+    }, 1000);
+}
+
+// Anti-AdBlock Integrado
+setInterval(function(){
+    var bait = document.createElement('div');
+    bait.className = 'adsbygoogle'; bait.style.cssText = 'position:absolute;left:-9999px;height:1px';
+    document.body.appendChild(bait);
+    setTimeout(function(){
+        if(bait.offsetHeight === 0){
+            document.getElementById('adblock-wall').classList.add('active');
+            document.querySelector('.container').style.pointerEvents = 'none';
+        } else {
+            document.getElementById('adblock-wall').classList.remove('active');
+            document.querySelector('.container').style.pointerEvents = 'auto';
+        }
+        document.body.removeChild(bait);
+    }, 1000);
+}, 3000);
+</script>
+</body>
+</html>
